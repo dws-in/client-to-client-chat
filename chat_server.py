@@ -15,6 +15,10 @@ def read_msg(clients, sock_cli, addr_cli, username_cli):
 
         if dest == "bcast":
             send_broadcast(clients, msg, addr_cli)
+
+        elif dest == "user" and msg == "list":
+            send_msg(sock_cli, clients.keys())
+
         else:
             dest_sock_cli = clients[dest][0]
             send_msg(dest_sock_cli, msg)
