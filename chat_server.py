@@ -10,7 +10,7 @@ def read_msg(clients, sock_cli, addr_cli, username_cli):
         if len(data) == 0:
             break
 
-        dest, msg = data.decode("utf-8")
+        dest, msg = data.decode("utf-8").split("|")
         msg = "<{}>: {}".format(username_cli, msg)
 
         if dest == "bcast":

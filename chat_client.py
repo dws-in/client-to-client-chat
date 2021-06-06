@@ -2,6 +2,9 @@ import socket
 import threading
 import sys
 
+BUFF_SIZE = 65535
+friends = []
+
 def read_msg(sock_cli):
     while True:
         data = sock_cli.recv(65535)
@@ -9,19 +12,43 @@ def read_msg(sock_cli):
             break
         print(data)
 
-sock_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock_client.connect(("127.0.0.1",6666))
+def add_friend(username_cli):
+    friends.append(username_cli)
+    print("SUCCESS! {} have been added as your friend.".format(username_cli))
 
-sock_client.send(bytes(sys.argv[1], "utf-8"))
+def list_friend():
+    print("List of friends:")
+    for friend in friends:
+        print(" - {}".format(friend))
 
-thread_client = threading.Thread(target=read_msg, args=(sock_client,))
-thread_client.start()
+
+sock_cli = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock_cli.connect(("127.0.0.1",6666))
+
+sock_cli.send(bytes(sys.argv[1], "utf-8"))
+
+thread_cli = threading.Thread(target=read_msg, args=(sock_cli,))
+thread_cli.start()
 
 while True:
-    dest = input("Masukkan username tujuan (ketikkan bcast untuk broadcast):")
-    msg = input("Masukkan pesan:")
+    dest = input("Enter destination ('bcast' for broadcast):")
+    msg = input("Enter message:")
 
     if msg == "exit":
-        sock_client.close()
+        sock_cli.close()
         break
-    sock_client.send(bytes("{}|{}".format(dest, msg), "utf-8"))
+
+    if msg == "add":
+        add_friend(dest)
+        continue
+
+    if msg == "list":
+        list_friend()
+        continue
+
+    else:
+        if dest not in friends:
+            print("WARNING! {} is not recognized as your friend.".format(dest))
+            continue
+        
+        sock_cli.send(bytes("{}|{}".format(dest, msg), "utf-8"))
